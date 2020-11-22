@@ -1,0 +1,12 @@
+{
+  "db": {
+    "dsn": "database dsn"
+  },
+  "sql_config": {
+    "sql_files": [
+      "./config/1.sql",
+      "./config/2.sql",
+      "./config3.sql"
+    ]
+  }
+}
