@@ -41,7 +41,9 @@ func main() {
 			logrus.Infof("execute: %v with config:%v", name, path)
 
 			executor.InitConfig(path)
-			logrus.Info(executor.Config.DB)
+
+
+			//logrus.Info(executor.Config.DB)
 			return nil
 		},
 	}

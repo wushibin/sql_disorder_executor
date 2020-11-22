@@ -50,6 +50,28 @@ func NewCombinatorGenerator(infoList []LoopInfo) *CombinatorGenerator {
 	return &generator
 }
 
+func DestroyCombinatorGenerator(generator *CombinatorGenerator)  {
+	close(generator.Run)
+	close(generator.More)
+}
+
+func (s *CombinatorGenerator) Generate() Combinator {
+	more := <-s.More
+
+	size := len(s.InstructionFlagList)
+	result := make([]int, size, size)
+	if more == true {
+		for idx, val := range s.InstructionFlagList {
+			result[idx] = val
+		}
+	}
+
+	// next loop
+	s.Run <- true
+
+	return Combinator{InstructionFlagList: result, EOF: more}
+}
+
 func (s *CombinatorGenerator) produce() {
 	loop := s.LoopList[s.LoopCount]
 
@@ -105,21 +127,4 @@ func (s *CombinatorGenerator) produce() {
 
 		nextCombinatorGenerator.produce()
 	}
-}
-
-func (s *CombinatorGenerator) Generate() Combinator {
-	more := <-s.More
-
-	size := len(s.InstructionFlagList)
-	result := make([]int, size, size)
-	if more == true {
-		for idx, val := range s.InstructionFlagList {
-			result[idx] = val
-		}
-	}
-
-	// next loop
-	s.Run <- true
-
-	return Combinator{InstructionFlagList: result, EOF: more}
 }

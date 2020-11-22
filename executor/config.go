@@ -20,7 +20,7 @@ type _Config struct {
 	SqlConfig FileConfig `json:"sql_config"`
 }
 
-var Config = _Config{}
+var config = _Config{}
 
 func InitConfig(path string) {
 	file, err := os.Open(path)
@@ -32,8 +32,12 @@ func InitConfig(path string) {
 	}
 
 	decoder := json.NewDecoder(bufio.NewReader(file))
-	if err := decoder.Decode(&Config); err != nil {
+	if err := decoder.Decode(&config); err != nil {
 		logrus.Fatal(err)
 		panic(err)
 	}
+}
+
+func GetConfig() _Config {
+	return config
 }

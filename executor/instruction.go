@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -27,32 +28,69 @@ func (s *SqlFile) Instruction(idx int) string {
 	return s.Instructions[idx]
 }
 
-type SqlFileManager struct {
+type SqlFileManager interface {
+	GetSqlFile(idx int) SqlFile
+	SqlFileCount() int
+	ListSqlFiles() []SqlFile
+}
+type SqlFileManagerImpl struct {
 	Files []SqlFile
 }
 
-func (s *SqlFileManager) AddSqlInstructionFile(name string, file bufio.Reader) {
-	si := SqlFile{
-		FileName: name,
+func NewSqlFileManager(cfg _Config) SqlFileManager {
+	manager := SqlFileManagerImpl{}
+
+	for _, file := range cfg.SqlConfig.SqlFiles {
+		_ = func() error {
+			ff, err := os.Open(file)
+			defer ff.Close()
+
+			if err != nil {
+				logrus.Error(err)
+				panic(err)
+			}
+
+			si := SqlFile{
+				FileName: file,
+			}
+
+			fi := bufio.NewReader(ff)
+			for {
+				l, _, err := fi.ReadLine()
+				if err == io.EOF {
+					break
+				}
+
+				ins := strings.TrimSpace(BytesToString(l))
+				if len(ins) == 0 {
+					continue
+				}
+
+				si.Instructions = append(si.Instructions, BytesToString(l))
+			}
+
+			manager.Files = append(manager.Files, si)
+			return nil
+		}
 	}
 
-	for {
-		l, _, err := file.ReadLine()
-		if err == io.EOF {
-			return
-		}
-
-		ins := strings.TrimSpace(BytesToString(l))
-		if len(ins) == 0 {
-			continue
-		}
-
-		si.Instructions = append(si.Instructions, BytesToString(l))
-	}
-
-	s.Files = append(s.Files, si)
+	return &manager
 }
 
-func NewSqlFileManager() *SqlFileManager {
-	return &SqlFileManager{}
+func (s *SqlFileManagerImpl) GetSqlFile(idx int) SqlFile {
+	if idx >= s.SqlFileCount() {
+		err := fmt.Errorf("sql index exceed max sql file count, idx:%v, count:%v", idx, s.SqlFileCount())
+		logrus.Error(err)
+		panic(err)
+	}
+
+	return s.Files[idx]
+}
+
+func (s *SqlFileManagerImpl) SqlFileCount() int {
+	return len(s.Files)
+}
+
+func (s *SqlFileManagerImpl) ListSqlFiles() []SqlFile {
+	return s.Files
 }
