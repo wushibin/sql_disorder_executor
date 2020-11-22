@@ -8,16 +8,16 @@ import (
 	"strings"
 )
 
-type SqlInstruction struct {
+type SqlFile struct {
 	FileName     string
 	Instructions []string
 }
 
-func (s *SqlInstruction) SqlCount() int {
+func (s *SqlFile) SqlCount() int {
 	return len(s.Instructions)
 }
 
-func (s *SqlInstruction) Instruction(idx int) string {
+func (s *SqlFile) Instruction(idx int) string {
 	if idx >= len(s.Instructions) {
 		err := fmt.Errorf("sql index exceed max sql file instraction count, file:%v, idx:%v, size:%v", s.FileName, idx, len(s.Instructions))
 		logrus.Error(err)
@@ -27,12 +27,12 @@ func (s *SqlInstruction) Instruction(idx int) string {
 	return s.Instructions[idx]
 }
 
-type SqlInstructionManager struct {
-	Files []SqlInstruction
+type SqlFileManager struct {
+	Files []SqlFile
 }
 
-func (s *SqlInstructionManager) AddSqlInstructionFile(name string, file bufio.Reader) {
-	si := SqlInstruction{
+func (s *SqlFileManager) AddSqlInstructionFile(name string, file bufio.Reader) {
+	si := SqlFile{
 		FileName: name,
 	}
 
@@ -53,6 +53,6 @@ func (s *SqlInstructionManager) AddSqlInstructionFile(name string, file bufio.Re
 	s.Files = append(s.Files, si)
 }
 
-func NewSqlInstructionManager() *SqlInstructionManager {
-	return &SqlInstructionManager{}
+func NewSqlFileManager() *SqlFileManager {
+	return &SqlFileManager{}
 }

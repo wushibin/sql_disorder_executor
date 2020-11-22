@@ -6,20 +6,19 @@ import (
 	"sql_disorder_executor/executor"
 )
 
-func setLoger() {
+func setLogger() {
 	logrus.SetFormatter(&logrus.TextFormatter{TimestampFormat: "2006-01-02 15:04:05"})
 	logrus.SetOutput(os.Stderr)
 	logrus.SetLevel(logrus.DebugLevel)
 }
 
 type SqlDisorderExecutor struct {
-	DBManager             *executor.DBManager
-	SqlInstructionManager *executor.SqlInstructionManager
-	//InstractionSortor
+	ClientManager  *executor.ClientManager
+	SqlFileManager *executor.SqlFileManager
 }
 
 func main() {
-	setLoger()
+	setLogger()
 
 	logrus.Info("hello")
 }

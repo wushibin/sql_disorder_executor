@@ -58,7 +58,7 @@ func (s *CombinatorGenerator) produce() {
 			s.InstructionFlagList[flagIdx] = loop.TagIndex
 		}
 
-		// nofity data is ready
+		// notify data is ready
 		s.More <- true
 
 		// wait to run next round
@@ -66,7 +66,45 @@ func (s *CombinatorGenerator) produce() {
 		return
 	}
 
+	seqGenerator := NewSequenceGenerator(len(s.UnSelectedIndexList), loop.Count)
+	defer DestroySequenceGenerator(seqGenerator)
 
+	for {
+		seqs, more := seqGenerator.Next()
+		if more == false {
+			return
+		}
+
+		for _, seq := range seqs {
+			flagIdx := s.UnSelectedIndexList[seq]
+			s.InstructionFlagList[flagIdx] = loop.TagIndex
+		}
+
+		nextUnSelectedIndexList := make([]int, len(s.UnSelectedIndexList)-loop.Count)
+		cmpIdx := 0
+		idx := 0
+		for i := 0; i < len(s.UnSelectedIndexList); i++ {
+			if int(i) == int(seqs[cmpIdx]) {
+				if cmpIdx < len(seqs)-1 {
+					cmpIdx++
+				}
+			} else {
+				nextUnSelectedIndexList[idx] = s.UnSelectedIndexList[i]
+				idx++
+			}
+		}
+
+		nextCombinatorGenerator := CombinatorGenerator{
+			InstructionFlagList: s.InstructionFlagList,
+			UnSelectedIndexList: nextUnSelectedIndexList,
+			LoopList:            s.LoopList,
+			LoopCount:           s.LoopCount + 1,
+			More:                s.More,
+			Run:                 s.Run,
+		}
+
+		nextCombinatorGenerator.produce()
+	}
 }
 
 func (s *CombinatorGenerator) Generate() Combinator {

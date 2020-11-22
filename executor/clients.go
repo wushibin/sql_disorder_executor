@@ -7,15 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type DBManager struct {
+type ClientManager struct {
 	dbs []*gorm.DB
 }
 
-func NewDBManager() *DBManager {
-	return &DBManager{}
+func NewClientManager() *ClientManager {
+	return &ClientManager{}
 }
 
-func (s *DBManager) AddDBInstance(dsn string) {
+func (s *ClientManager) AddClientInstance(dsn string) {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		logrus.Panic(err)
@@ -25,7 +25,7 @@ func (s *DBManager) AddDBInstance(dsn string) {
 	s.dbs = append(s.dbs, db)
 }
 
-func (s *DBManager) GetDB(idx int) *gorm.DB {
+func (s *ClientManager) GetDB(idx int) *gorm.DB {
 	if idx >= len(s.dbs) {
 		logrus.Errorf("index is exceed db connections, index:%v, count:%v", idx, len(s.dbs))
 		panic(fmt.Errorf("index is excced db connections"))
