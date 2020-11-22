@@ -22,7 +22,7 @@ type CombinatorGenerator struct {
 func NewCombinatorGenerator(infoList []LoopInfo) *CombinatorGenerator {
 	total := 0
 	for _, info := range infoList {
-		total = + info.Count
+		total += info.Count
 	}
 
 	incrIdxList := make([]int, total, total)
@@ -50,7 +50,7 @@ func NewCombinatorGenerator(infoList []LoopInfo) *CombinatorGenerator {
 	return &generator
 }
 
-func DestroyCombinatorGenerator(generator *CombinatorGenerator)  {
+func DestroyCombinatorGenerator(generator *CombinatorGenerator) {
 	close(generator.Run)
 	close(generator.More)
 }
@@ -69,7 +69,7 @@ func (s *CombinatorGenerator) Generate() Combinator {
 	// next loop
 	s.Run <- true
 
-	return Combinator{InstructionFlagList: result, EOF: more}
+	return Combinator{InstructionFlagList: result, EOF: !more}
 }
 
 func (s *CombinatorGenerator) produce() {

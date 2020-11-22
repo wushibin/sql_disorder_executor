@@ -71,8 +71,9 @@ func NewSqlFileManager(cfg _Config) SqlFileManager {
 
 			manager.Files = append(manager.Files, si)
 			return nil
-		}
+		}()
 	}
+
 
 	return &manager
 }

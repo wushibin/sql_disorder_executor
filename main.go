@@ -4,6 +4,7 @@ import (
 	logrus "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 	"os"
+	"sql_disorder_executor/di"
 	"sql_disorder_executor/executor"
 )
 
@@ -13,10 +14,7 @@ func setLogger() {
 	logrus.SetLevel(logrus.DebugLevel)
 }
 
-type SqlDisorderExecutor struct {
-	ClientManager  *executor.ClientManager
-	SqlFileManager *executor.SqlFileManager
-}
+
 
 func main() {
 	setLogger()
@@ -42,8 +40,20 @@ func main() {
 
 			executor.InitConfig(path)
 
+			container := di.GetContainer()
+			container.Register(executor.GetConfig)
+			container.Register(executor.NewSqlFileManager)
+			container.Register(executor.NewExecutor)
 
-			//logrus.Info(executor.Config.DB)
+			err := container.Call(func(executor executor.Executor) error {
+				return executor.Run()
+			})
+			if err != nil {
+				logrus.Errorf("execute sql disorder error: %v", err)
+				return err
+			}
+
+			logrus.Info("execute sql disorder success")
 			return nil
 		},
 	}
