@@ -18,7 +18,7 @@ func (s *SqlFile) SqlCount() int {
 	return len(s.Instructions)
 }
 
-func (s *SqlFile) Instruction(idx int) string {
+func (s *SqlFile) GetInstruction(idx int) string {
 	if idx >= len(s.Instructions) {
 		err := fmt.Errorf("sql index exceed max sql file instraction count, file:%v, idx:%v, size:%v", s.FileName, idx, len(s.Instructions))
 		logrus.Error(err)

@@ -35,6 +35,7 @@ func (s *ExecutorImpl) Run() error {
 	generator := NewCombinatorGenerator(loopInfoList)
 	defer DestroyCombinatorGenerator(generator)
 
+	idx := 0
 	for {
 		combinator := generator.Generate()
 		if combinator.EOF {
@@ -43,7 +44,8 @@ func (s *ExecutorImpl) Run() error {
 			return nil
 		}
 
-		s.SqlGroupRunner.RunInstruction(combinator.InstructionFlagList)
+		s.SqlGroupRunner.RunInstruction(fmt.Sprintf("Task:%v", idx), combinator.InstructionFlagList)
+		idx++
 	}
 
 	return nil

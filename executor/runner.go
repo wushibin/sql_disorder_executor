@@ -7,7 +7,7 @@ import (
 )
 
 type SqlGroupRunner interface {
-	RunInstruction(instructionList []int) error
+	RunInstruction(task string, instructionList []int) error
 	Waiting()
 }
 
@@ -30,7 +30,7 @@ type SqlGroupRunnerImpl struct {
 	WaitGroup      sync.WaitGroup
 }
 
-func (s *SqlGroupRunnerImpl) RunInstruction(instructionFlagList []int) error {
+func (s *SqlGroupRunnerImpl) RunInstruction(taskName string, instructionFlagList []int) error {
 	var recordList []SqlRunner
 
 	for idx, sqlFile := range s.SqlFileManager.ListSqlFiles() {
@@ -49,7 +49,7 @@ func (s *SqlGroupRunnerImpl) RunInstruction(instructionFlagList []int) error {
 
 		for _, instruction := range instructionFlagList {
 			recorder := recordList[instruction]
-			if err := recorder.ExecOneSqlItem(); err != nil {
+			if err := recorder.ExecNextSqlStatement(taskName); err != nil {
 				logrus.Error(err)
 				panic(err)
 			}
@@ -71,8 +71,11 @@ type SqlRunner struct {
 	Client  Client
 }
 
-func (s *SqlRunner) ExecOneSqlItem() error {
-	err := s.Client.Execute(s.SqlFile.Instruction(s.Current))
+func (s *SqlRunner) ExecNextSqlStatement(task string) error {
+	statement := s.SqlFile.GetInstruction(s.Current)
+	logrus.Infof("[SqlRunner]: task:%v, statement:%v", task, statement)
+
+	err := s.Client.Execute(statement)
 	if err != nil {
 		return err
 	}
