@@ -14,8 +14,6 @@ func setLogger() {
 	logrus.SetLevel(logrus.DebugLevel)
 }
 
-
-
 func main() {
 	setLogger()
 
@@ -24,9 +22,9 @@ func main() {
 	app := &cli.App{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "conf",
+				Name:     "conf",
 				Required: true,
-				Usage: "sql disorder executor config file",
+				Usage:    "sql disorder executor config file",
 			},
 		},
 		Action: func(c *cli.Context) error {
@@ -45,7 +43,7 @@ func main() {
 			container.Register(executor.NewSqlFileManager)
 			container.Register(executor.NewClientManager)
 			container.Register(executor.NewSqlGroupRunner)
-			container.Register(func() executor.ClientBuilder{return executor.BuildMockClient})
+			container.Register(func() executor.ClientBuilder { return executor.BuildDBClient })
 			container.Register(executor.NewExecutor)
 
 			err := container.Call(func(executor executor.Executor) error {

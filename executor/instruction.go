@@ -66,7 +66,7 @@ func NewSqlFileManager(cfg _Config) SqlFileManager {
 					continue
 				}
 
-				si.Instructions = append(si.Instructions, BytesToString(l))
+				si.Instructions = append(si.Instructions, ins)
 			}
 
 			manager.Files = append(manager.Files, si)

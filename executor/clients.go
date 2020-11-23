@@ -18,8 +18,7 @@ type DBClient struct {
 }
 
 func (s *DBClient) Execute(sql string) error {
-	logrus.Info(sql)
-	return nil
+	return s.Exec(sql).Error
 }
 
 type MockClient struct {
