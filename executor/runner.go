@@ -31,25 +31,25 @@ type SqlGroupRunnerImpl struct {
 }
 
 func (s *SqlGroupRunnerImpl) RunInstruction(taskName string, instructionFlagList []int) error {
-	var recordList []SqlRunner
+	var recordList []*SqlRunner
 
 	for idx, sqlFile := range s.SqlFileManager.ListSqlFiles() {
 		client := s.ClientManager.GetClient(idx)
-		record := SqlRunner{
+		runner := SqlRunner{
 			Current: 0,
 			SqlFile: sqlFile,
 			Client:  client,
 		}
 
-		recordList = append(recordList, record)
+		recordList = append(recordList, &runner)
 	}
 
 	s.WaitGroup.Add(1)
 	go func() {
 
 		for _, instruction := range instructionFlagList {
-			recorder := recordList[instruction]
-			if err := recorder.ExecNextSqlStatement(taskName); err != nil {
+			runner := recordList[instruction]
+			if err := runner.ExecNextSqlStatement(taskName); err != nil {
 				logrus.Error(err)
 				panic(err)
 			}
@@ -73,7 +73,7 @@ type SqlRunner struct {
 
 func (s *SqlRunner) ExecNextSqlStatement(task string) error {
 	statement := s.SqlFile.GetInstruction(s.Current)
-	logrus.Infof("[SqlRunner]: task:%v, statement:%v", task, statement)
+	logrus.Infof("[SqlRunner]: task:%v, sql_file:%v, current:%v, statement:(%v)", task, s.SqlFile.FileName, s.Current, statement)
 
 	err := s.Client.Execute(statement)
 	if err != nil {

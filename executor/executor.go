@@ -40,11 +40,11 @@ func (s *ExecutorImpl) Run() error {
 		combinator := generator.Generate()
 		if combinator.EOF {
 			s.SqlGroupRunner.Waiting()
-			logrus.Info("finished")
+			logrus.Infof("finished, loop count:%v", idx)
 			return nil
 		}
 
-		s.SqlGroupRunner.RunInstruction(fmt.Sprintf("Task:%v", idx), combinator.InstructionFlagList)
+		s.SqlGroupRunner.RunInstruction(fmt.Sprintf("loop_%v", idx), combinator.InstructionFlagList)
 		idx++
 	}
 
