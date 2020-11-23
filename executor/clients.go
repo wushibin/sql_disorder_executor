@@ -7,29 +7,72 @@ import (
 	"gorm.io/gorm"
 )
 
-type ClientManager struct {
-	dbs []*gorm.DB
+type ClientBuilder func(dsn string) Client
+
+type Client interface {
+	Execute(sql string) error
 }
 
-func NewClientManager() *ClientManager {
-	return &ClientManager{}
+type DBClient struct {
+	*gorm.DB
 }
 
-func (s *ClientManager) AddClientInstance(dsn string) {
+func (s *DBClient) Execute(sql string) error {
+	logrus.Info(sql)
+	return nil
+}
+
+type MockClient struct {
+	DSN string
+}
+
+func BuildDBClient(dsn string) Client {
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		logrus.Panic(err)
 		panic(err)
 	}
 
-	s.dbs = append(s.dbs, db)
+	return &DBClient{db}
 }
 
-func (s *ClientManager) GetDB(idx int) *gorm.DB {
+func BuildMockClient(dsn string) Client  {
+	return &MockClient{DSN: dsn}
+}
+
+func (s *MockClient) Execute(sql string) error {
+	logrus.Infof("DSN:%v, Sql:%v", s.DSN, sql)
+	return nil
+}
+
+type ClientManager interface {
+	GetClient(idx int) Client
+	ClientCount() int
+}
+
+type ClientManagerImpl struct {
+	dbs []Client
+}
+
+func NewClientManager(cfg _Config, fileManager SqlFileManager, clientBuilder ClientBuilder) ClientManager {
+	m := &ClientManagerImpl{}
+
+	for i:=0; i<fileManager.SqlFileCount(); i++ {
+		m.dbs = append(m.dbs, clientBuilder(cfg.DB.DSN))
+	}
+
+	return m
+}
+
+func (s *ClientManagerImpl) GetClient(idx int) Client {
 	if idx >= len(s.dbs) {
 		logrus.Errorf("index is exceed db connections, index:%v, count:%v", idx, len(s.dbs))
 		panic(fmt.Errorf("index is excced db connections"))
 	}
 
 	return s.dbs[idx]
+}
+
+func (s *ClientManagerImpl) ClientCount() int {
+	return len(s.dbs)
 }

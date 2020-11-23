@@ -43,6 +43,9 @@ func main() {
 			container := di.GetContainer()
 			container.Register(executor.GetConfig)
 			container.Register(executor.NewSqlFileManager)
+			container.Register(executor.NewClientManager)
+			container.Register(executor.NewSqlGroupRunner)
+			container.Register(func() executor.ClientBuilder{return executor.BuildMockClient})
 			container.Register(executor.NewExecutor)
 
 			err := container.Call(func(executor executor.Executor) error {

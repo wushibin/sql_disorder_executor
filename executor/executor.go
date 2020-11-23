@@ -3,26 +3,27 @@ package executor
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"sync"
 )
 
 type Executor interface {
 	Run() error
 }
 
-func NewExecutor(fileManager SqlFileManager) Executor {
+func NewExecutor(SqlFileManager SqlFileManager, runner SqlGroupRunner) Executor {
 	return &ExecutorImpl{
-		sqlFileManager: fileManager,
+		SqlFileManager: SqlFileManager,
+		SqlGroupRunner: runner,
 	}
 }
 
 type ExecutorImpl struct {
-	sqlFileManager SqlFileManager
+	SqlFileManager SqlFileManager
+	SqlGroupRunner SqlGroupRunner
 }
 
 func (s *ExecutorImpl) Run() error {
-	var loopInfoList  []LoopInfo
-	for idx, sqlFile := range s.sqlFileManager.ListSqlFiles() {
+	var loopInfoList []LoopInfo
+	for idx, sqlFile := range s.SqlFileManager.ListSqlFiles() {
 		loopInfoList = append(loopInfoList, LoopInfo{TagIndex: idx, Count: sqlFile.SqlCount()})
 	}
 
@@ -34,17 +35,15 @@ func (s *ExecutorImpl) Run() error {
 	generator := NewCombinatorGenerator(loopInfoList)
 	defer DestroyCombinatorGenerator(generator)
 
-	var wg sync.WaitGroup
-
 	for {
 		combinator := generator.Generate()
 		if combinator.EOF {
-			wg.Wait()
+			s.SqlGroupRunner.Waiting()
 			logrus.Info("finished")
 			return nil
 		}
 
-		logrus.Info(combinator.InstructionFlagList)
+		s.SqlGroupRunner.RunInstruction(combinator.InstructionFlagList)
 	}
 
 	return nil
