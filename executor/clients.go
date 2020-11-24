@@ -40,7 +40,7 @@ func BuildMockClient(dsn string) Client  {
 }
 
 func (s *MockClient) Execute(sql string) error {
-	logrus.Debugf("MockClient: DSN:%v, Sql:%v", s.DSN, sql)
+	logrus.Debugf("MockClient: execute sql:%v", sql)
 	return nil
 }
 

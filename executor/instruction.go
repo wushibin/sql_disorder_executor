@@ -61,7 +61,7 @@ func NewSqlFileManager(cfg _Config) SqlFileManager {
 					break
 				}
 
-				ins := strings.TrimSpace(BytesToString(l))
+				ins := strings.TrimSpace(string(l))
 				if len(ins) == 0 {
 					continue
 				}
