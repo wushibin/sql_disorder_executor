@@ -45,7 +45,7 @@ cd tidb-docker-compose && docker-compose pull
 docker-compose up -d
 ```
 
--. Create Table
+- Create Table
 
 ```
 using test; 
@@ -56,21 +56,21 @@ CREATE TABLE `x` (
 ) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4;
 ```
 
--. Run the app with MockClient
+- Run the app with MockClient
 
 ```
 go build
 ./sql_disorder_executor --conf ./config/config.json mock > runlog.log 
 ```
 
--. Run the app with DB
+- Run the app with DB
 
 ```
 go build
 ./sql_disorder_executor --conf ./config/config.json > runlog.log 
 ```
 
--. Verify the result
+- Verify the result
 
 ```
 grep "loop_1," runlog.log --color
