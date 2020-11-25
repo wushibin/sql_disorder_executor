@@ -10,7 +10,7 @@ import (
 
 func setLogger() {
 	logrus.SetFormatter(&logrus.TextFormatter{TimestampFormat: "2006-01-02 15:04:05"})
-	logrus.SetOutput(os.Stderr)
+	logrus.SetOutput(os.Stdout)
 	logrus.SetLevel(logrus.DebugLevel)
 }
 

@@ -36,4 +36,42 @@
 - 程序的优雅退出，现在程序执行过得中生成"组合序列"并创建新的goroutine执行"组合序列"对应的SQL语句，主进程等待所有的goroutine执行完毕后，才能退出，并没有超时退出机制和通知goroutine退出的机制。
 - 完善的单测。
 
-## 程序使用
+## 运行
+
+- 启动TIDB 
+```
+git clone https://github.com/pingcap/tidb-docker-compose.git
+cd tidb-docker-compose && docker-compose pull
+docker-compose up -d
+```
+
+-. Create Table
+
+```
+using test; 
+CREATE TABLE `x` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `a` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4;
+```
+
+-. Run the app with MockClient
+
+```
+go build
+./sql_disorder_executor --conf ./config/config.json mock > runlog.log 
+```
+
+-. Run the app with DB
+
+```
+go build
+./sql_disorder_executor --conf ./config/config.json > runlog.log 
+```
+
+-. Verify the result
+
+```
+grep "loop_1," runlog.log --color
+```
