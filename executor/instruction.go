@@ -14,10 +14,12 @@ type SqlFile struct {
 	Instructions []string
 }
 
+// 文件中SQL语句的数量
 func (s *SqlFile) SqlCount() int {
 	return len(s.Instructions)
 }
 
+// 获取文件中第index条SQL语句
 func (s *SqlFile) GetInstruction(idx int) string {
 	if idx >= len(s.Instructions) {
 		err := fmt.Errorf("sql index exceed max sql file instraction count, file:%v, idx:%v, size:%v", s.FileName, idx, len(s.Instructions))
@@ -33,10 +35,13 @@ type SqlFileManager interface {
 	SqlFileCount() int
 	ListSqlFiles() []SqlFile
 }
+
+// Sql文件管理
 type SqlFileManagerImpl struct {
 	Files []SqlFile
 }
 
+// 方法会注册到Container， 根据配置文件中指定的SQL文件，读取SQL文件中的SQL语句到内存，管理SQL文件。
 func NewSqlFileManager(cfg _Config) SqlFileManager {
 	manager := SqlFileManagerImpl{}
 
@@ -78,6 +83,7 @@ func NewSqlFileManager(cfg _Config) SqlFileManager {
 	return &manager
 }
 
+// 获取指定index的SQL文件
 func (s *SqlFileManagerImpl) GetSqlFile(idx int) SqlFile {
 	if idx >= s.SqlFileCount() {
 		err := fmt.Errorf("sql index exceed max sql file count, idx:%v, count:%v", idx, s.SqlFileCount())

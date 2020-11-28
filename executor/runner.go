@@ -30,9 +30,13 @@ type SqlGroupRunnerImpl struct {
 	WaitGroup      sync.WaitGroup
 }
 
+// 根据当前语句的执行序列，调用相应的数据库客户端依次执行SQL
+// 如：标识的序列是：（文件1， 文件2， 文件1), SQL的执行顺序是：
+// (执行文件1的第1条SQL语句，执行文件2的第1条SQL， 执行文件1的第2条SQL语句)
 func (s *SqlGroupRunnerImpl) RunInstruction(taskName string, instructionFlagList []int) error {
 	var recordList []*SqlRunner
 
+	// 将SQL文件与相应的数据库客户端对应
 	for idx, sqlFile := range s.SqlFileManager.ListSqlFiles() {
 		client := s.ClientManager.GetClient(idx)
 		runner := SqlRunner{
@@ -44,11 +48,13 @@ func (s *SqlGroupRunnerImpl) RunInstruction(taskName string, instructionFlagList
 		recordList = append(recordList, &runner)
 	}
 
+	// 创建go routine执行序列对应的SQL
 	s.WaitGroup.Add(1)
 	go func() {
 
-		for _, instruction := range instructionFlagList {
-			runner := recordList[instruction]
+		for _, flagIndex := range instructionFlagList {
+			runner := recordList[flagIndex]
+			// 通过SQL文件对应的数据库客户端，执行SQL文件的下一条SQL语名
 			if err := runner.ExecNextSqlStatement(taskName); err != nil {
 				logrus.Error(err)
 				panic(err)
@@ -72,6 +78,7 @@ type SqlRunner struct {
 }
 
 func (s *SqlRunner) ExecNextSqlStatement(task string) error {
+	// 获取SQL文件的s.Current条SQL语句
 	statement := s.SqlFile.GetInstruction(s.Current)
 	logrus.Infof("[SqlRunner]: task:%v, sql_file:%v, current:%v, statement:(%v)", task, s.SqlFile.FileName, s.Current, statement)
 
@@ -80,6 +87,7 @@ func (s *SqlRunner) ExecNextSqlStatement(task string) error {
 		return err
 	}
 
+	// 标识下一条需要执行的SQL语句
 	s.Current++
 	return nil
 }

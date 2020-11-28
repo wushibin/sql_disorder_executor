@@ -27,6 +27,7 @@ func main() {
 				Usage:    "sql disorder executor config file",
 			},
 		},
+		// ROOT command， 使用真实的数据库执行SQL语句
 		Action: func(c *cli.Context) error {
 			name := "sql disorder executor"
 			if c.NArg() > 0 {
@@ -45,6 +46,7 @@ func main() {
 			logrus.Info("execute sql disorder success")
 			return nil
 		},
+		// Sub Command (mock), 使用mock的数据库执行SQL语句，验证乱序执行过程是否是正确的
 		Commands: []*cli.Command {
 			{
 				Name: "mock",
@@ -77,6 +79,7 @@ func main() {
 	}
 }
 
+// 注册mock的数据库执行sql语句
 func mockSqlDisorderExecute(conf string) error {
 	executor.InitConfig(conf)
 
@@ -97,6 +100,7 @@ func mockSqlDisorderExecute(conf string) error {
 	return err
 }
 
+// 注册真实的数据库执行sql语句
 func pingCapSqlDisorderExecute(conf string) error {
 	executor.InitConfig(conf)
 

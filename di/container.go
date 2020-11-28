@@ -2,11 +2,13 @@ package di
 
 import "go.uber.org/dig"
 
+// 依赖注入实例管理
 type Container interface {
 	Register(constructor interface{}, opts ...dig.ProvideOption)
 	Call(function interface{}, opts ...dig.InvokeOption) error
 }
 
+// 依赖注入实例管理，通过封装uber的dig库，实现实例的注册、依赖反转控制
 type AppContainer struct {
 	*dig.Container
 }

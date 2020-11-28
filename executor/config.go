@@ -22,6 +22,7 @@ type _Config struct {
 
 var config = _Config{}
 
+// 加载配置文件
 func InitConfig(path string) {
 	file, err := os.Open(path)
 	defer file.Close()
